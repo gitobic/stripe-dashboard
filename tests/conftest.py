@@ -77,9 +77,7 @@ def setup_test_environment():
     # Set test environment variables
     test_env = {
         'STRIPE_SECRET_KEY': 'sk_test_fake_key_for_testing',
-        'STRIPE_PUBLISHABLE_KEY': 'pk_test_fake_key_for_testing',
-        'ANTHROPIC_API_KEY': 'fake_anthropic_key_for_testing',
-        'GOOGLE_SERVICE_ACCOUNT_JSON': '{"type": "service_account", "project_id": "test"}'
+        'STRIPE_PUBLISHABLE_KEY': 'pk_test_fake_key_for_testing'
     }
     
     # Store original values

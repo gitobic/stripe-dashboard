@@ -125,4 +125,59 @@ Both MCP servers are production-ready and enhance development capabilities beyon
 - Subscription analytics and tracking
 - Additional usability improvements
 
-**Status**: Core functionality complete, additional features and polish in development.
+**Status**: Core functionality complete, preparing for Streamlit Cloud deployment.
+
+## 🚀 Streamlit Cloud Deployment Plan
+
+### Deployment Phases:
+
+#### Phase 1: Authentication & Security
+- **Task**: Implement username/password authentication system
+- **Reason**: Protect sensitive financial data in cloud environment
+- **Implementation**: Session-based authentication with Streamlit state management
+
+#### Phase 2: Secrets Management
+- **Task**: Configure secure API key storage for cloud deployment
+- **Files**: Create `.streamlit/secrets.toml` for local testing
+- **Cloud**: Configure secrets in Streamlit Cloud dashboard
+- **Environment**: Support both `.env` (local) and Streamlit secrets (cloud)
+
+#### Phase 3: Cloud Compatibility
+- **Task**: Create `requirements.txt` for Streamlit Cloud dependency management
+- **Task**: Update `config/settings.py` to handle both local and cloud environments
+- **Task**: Add `.streamlit/config.toml` for optimized cloud performance
+
+#### Phase 4: Deployment & Testing
+- **Task**: Test locally with cloud-like configuration
+- **Task**: Deploy to Streamlit Cloud with GitHub integration
+- **Task**: Verify all dashboard functionality in production environment
+- **Task**: Configure optional custom domain
+
+### Required Files for Deployment:
+```
+.streamlit/
+├── secrets.toml     # Local secrets (git-ignored)
+└── config.toml      # Streamlit app configuration
+
+requirements.txt     # Cloud dependencies
+```
+
+### Authentication Implementation:
+- Simple username/password protection
+- Session-based access control
+- Automatic logout on browser close
+- Secure credential handling via Streamlit secrets
+
+### Cloud Benefits:
+- **Free hosting** for personal projects
+- **Automatic HTTPS** and security
+- **GitHub integration** for continuous deployment
+- **Built-in secrets management**
+- **No server maintenance** required
+
+### Deployment Readiness:
+- ✅ Core application stable and tested
+- ✅ Modular architecture cloud-ready
+- 🔄 Authentication system (in progress)
+- 🔄 Secrets management configuration (in progress)
+- ⏳ Cloud deployment testing (pending)
