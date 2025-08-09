@@ -115,7 +115,7 @@ def render_transactions_dashboard():
         
         chart_type = st.selectbox(
             "Chart Type",
-            ["Daily Revenue", "Revenue by Product", "Payment Methods", "Both"],
+            ["Daily Revenue", "Revenue by Product", "Payment Methods", "All Charts"],
             key="trans_chart_type"
         )
     
@@ -123,6 +123,22 @@ def render_transactions_dashboard():
         st.write("**Amount Range:**")
         min_amount = st.number_input("Min $", min_value=0.0, value=0.0, step=1.0, key="trans_min_amount")
         max_amount = st.number_input("Max $", min_value=0.0, value=10000.0, step=1.0, key="trans_max_amount")
+    
+    # Quick Actions section
+    st.write("**Quick Actions:**")
+    quick_col1, quick_col2, quick_col3 = st.columns(3)
+    
+    with quick_col1:
+        if st.button("🔄 Refresh Transaction Data", key="trans_refresh"):
+            st.rerun()
+    
+    with quick_col2:
+        # Placeholder for CSV export button - will be functional after data load
+        csv_button_placeholder = st.empty()
+    
+    with quick_col3:
+        # Placeholder for Excel export button - will be functional after data load
+        excel_button_placeholder = st.empty()
     
     st.markdown("---")
     
@@ -167,14 +183,22 @@ def render_transactions_dashboard():
         fig_revenue = create_revenue_chart(filtered_data)
         st.plotly_chart(fig_revenue, use_container_width=True)
     
-    elif chart_type == "Both":
+    elif chart_type == "All Charts":
+        # Show all three charts in a nice layout
+        st.subheader("📈 Daily Revenue Trend")
+        fig_revenue = create_revenue_chart(filtered_data)
+        st.plotly_chart(fig_revenue, use_container_width=True)
+        
+        # Two charts side by side
         col1, col2 = st.columns(2)
         with col1:
-            fig_revenue = create_revenue_chart(filtered_data)
-            st.plotly_chart(fig_revenue, use_container_width=True)
-        with col2:
+            st.subheader("💰 Revenue by Product")
             fig_product = create_product_chart(filtered_data)
             st.plotly_chart(fig_product, use_container_width=True)
+        with col2:
+            st.subheader("💳 Payment Methods")
+            fig_payment = create_payment_method_chart(filtered_data)
+            st.plotly_chart(fig_payment, use_container_width=True)
     
     elif chart_type == "Revenue by Product":
         fig_product = create_product_chart(filtered_data)
@@ -354,28 +378,27 @@ def render_transactions_dashboard():
     
     st.dataframe(df, use_container_width=True)
     
-    # Export functionality
-    st.subheader("Export Data")
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
+    # Populate Quick Actions export buttons with actual data
+    with csv_button_placeholder.container():
         # CSV export
         csv_data = df.to_csv(index=False)
         st.download_button(
-            label="📥 Download CSV",
+            label="📥 Export CSV",
             data=csv_data,
             file_name=f"stripe_transactions_{start_date}_{end_date}.csv",
-            mime="text/csv"
+            mime="text/csv",
+            key="trans_csv_export"
         )
     
-    with col2:
+    with excel_button_placeholder.container():
         # Excel export
         excel_buffer = BytesIO()
         df.to_excel(excel_buffer, index=False, engine='openpyxl')
         excel_data = excel_buffer.getvalue()
         st.download_button(
-            label="📊 Download Excel", 
+            label="📊 Export Excel", 
             data=excel_data,
             file_name=f"stripe_transactions_{start_date}_{end_date}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            key="trans_excel_export"
         )

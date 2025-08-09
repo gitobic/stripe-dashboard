@@ -1,26 +1,23 @@
 # 🚀 Stripe Dashboard - Team Orlando Water Polo Club
 
-> **Production-Ready** comprehensive financial analytics dashboard for Stripe payment data with AI-powered insights, customer management, and automated reporting.
+> Streamlined financial analytics dashboard for Stripe payment data with transaction tracking, customer management, and subscription analytics.
 
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](https://github.com/gitobic/stripe-dashboard)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Streamlit](https://img.shields.io/badge/Built%20with-Streamlit-red.svg)](https://streamlit.io/)
 [![Stripe API](https://img.shields.io/badge/Stripe-API%20Optimized-purple.svg)](https://stripe.com/docs/api)
 
-## 🎯 Project Status: PRODUCTION READY ✅
+## 🎯 Project Status: IN DEVELOPMENT 🔧
 
-**Last Updated:** August 8, 2025  
-**Completion:** 100% - Refactored & Optimized  
-**Architecture:** Modular, tested, and production-ready  
-**Ready for:** Immediate deployment by Team Orlando Water Polo Club
+**Last Updated:** August 9, 2025  
+**Completion:** In Progress - Core Features Implemented  
+**Architecture:** Modular and organized  
+**Current Focus:** Core transaction, customer, and subscription management
 
 ## ⚡ Quick Start
 
 ### Prerequisites
 - Python 3.11+
 - Stripe account with test/live API keys
-- Optional: Google Cloud Service Account (for Google Sheets export)
-- Optional: Anthropic API key (for AI insights)
 
 ### Installation & Setup
 
@@ -37,7 +34,6 @@ cp .env.example .env
 # Edit .env with your API keys:
 STRIPE_SECRET_KEY=sk_test_your_stripe_secret_key
 STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key
-ANTHROPIC_API_KEY=sk-ant-api-your-anthropic-key  # Optional
 ```
 
 3. **Run the Dashboard**
@@ -74,7 +70,6 @@ stripe-dashboard/
 ├── exports/
 │   ├── excel_export.py      # Excel report generation
 │   ├── pdf_export.py        # PDF report generation
-│   └── sheets_export.py     # Google Sheets integration
 ├── utils/
 │   ├── formatters.py        # Data formatting utilities
 │   └── helpers.py           # Common helper functions
@@ -87,48 +82,34 @@ stripe-dashboard/
 ### 🔧 Technology Stack
 - **Backend**: Streamlit with FastAPI integration
 - **Data Processing**: Pandas for analytics, Plotly for interactive visualizations
-- **APIs**: Stripe SDK, Claude AI (Anthropic), Google Sheets API
+- **APIs**: Stripe SDK
 - **Caching**: Session-based intelligent caching (5-10 minute TTL)
 - **Testing**: Pytest with 70%+ code coverage requirement
-- **Export**: Excel (openpyxl), PDF (reportlab), Google Sheets (gspread)
 
 ## 🎨 Features Overview
 
-### Complete 5-Tab Dashboard Interface
+### 3-Tab Dashboard Interface
 
 #### 📊 **Transactions Analytics**
 - **Real-time Revenue Charts**: Daily revenue trends, product breakdown, payment method analysis
 - **Enhanced Filtering**: Fixed transaction filtering with all Stripe statuses (succeeded, failed, disputed, refunded, pending, etc.)
 - **Smart Data Loading**: Auto-pagination handles unlimited transactions
 - **Performance**: Intelligent 5-minute caching, 60-70% fewer API calls
-- **Export Options**: CSV, Excel with complete transaction history
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel in consistent interface
 
 #### 👥 **Customer Management** 
-- **Complete CRM Features**: Customer profiles, contact info, payment history
-- **Tagging System**: Color-coded tags (VIP, Refund Risk, New Customer, Payment Issues)
-- **Notes & Tracking**: Timestamped interaction tracking and customer notes
+- **Complete Customer Profiles**: Contact info, payment history, individual customer drill-down
 - **Advanced Search**: Filter by status, tags, search by name/email
-- **Lifetime Value**: Automated CLV calculations for customer prioritization
+- **Customer Details**: Individual customer analysis with comprehensive data
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel in consistent interface
 
 #### 🔄 **Subscription Analytics**
 - **MRR/ARR Tracking**: Real-time recurring revenue calculations
 - **Business Metrics**: Churn rates, trial conversion, plan performance
 - **Visual Analytics**: Status breakdowns, revenue by plan charts
 - **Subscription Management**: Filter by status, plan type, billing cycles
-- **Comprehensive Exports**: Detailed subscription reports and metrics
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel in consistent interface
 
-#### 📋 **Reports & Export**
-- **Multi-Format Export**: Google Sheets API, Excel, PDF reports
-- **AI-Powered Summaries**: Claude AI generates executive summaries
-- **Automated Reporting**: Comprehensive reports with key metrics
-- **Flexible Periods**: Custom date ranges with intelligent defaults
-
-#### 🤖 **AI Analytics & Insights**
-- **Stripe Fee Analysis**: Detailed fee breakdowns with optimization recommendations
-- **Revenue Forecasting**: 1-12 month predictions with confidence intervals
-- **Customer Lifetime Value**: Automated CLV analysis for top customers
-- **AI Business Recommendations**: Claude-powered strategic advice
-- **Tag Analytics**: Customer segmentation analysis and performance
 
 ## ⚙️ Configuration
 
@@ -140,14 +121,6 @@ STRIPE_SECRET_KEY=sk_test_...        # Your Stripe secret key
 STRIPE_PUBLISHABLE_KEY=pk_test_...   # Your Stripe publishable key
 ```
 
-**Optional (Enhanced Features):**
-```bash
-# For Google Sheets export
-GOOGLE_SERVICE_ACCOUNT_JSON={"type": "service_account", ...}
-
-# For Claude AI insights and summaries  
-ANTHROPIC_API_KEY=sk-ant-api...
-```
 
 ### MCP Servers (Development Enhancement)
 Two MCP servers are configured for enhanced development:
@@ -197,7 +170,7 @@ uv run pytest -m integration
 1. **Detailed Analytics**: Full transaction analysis with enhanced filtering
 2. **Subscription Management**: MRR/ARR tracking and churn analysis
 3. **Fee Optimization**: AI recommendations for reducing payment processing costs
-4. **Export Capabilities**: Regular reporting in Excel, PDF, or Google Sheets
+4. **Export Capabilities**: Regular reporting in CSV and Excel formats
 
 ### For Operations
 1. **Customer Management**: Tag customers, track interactions, manage notes
@@ -246,7 +219,7 @@ uv run mypy .
 - ✅ **Enhanced Testing**: Added comprehensive unit and integration test suite
 - ✅ **Fixed Transaction Filtering**: Now includes all Stripe charge statuses (disputed, refunded, etc.)
 - ✅ **Improved Maintainability**: Clean separation of concerns and better debugging
-- ✅ **Production Ready**: Fully tested and optimized for deployment
+- 🔧 **In Development**: Core features implemented, additional features in progress
 
 ## 📊 Current Status
 
@@ -260,7 +233,7 @@ uv run mypy .
 
 **Phase 2 - Priority Features**: 100% Complete
 - Advanced filtering (all payment statuses, amounts)
-- Export & reporting (CSV, Excel, PDF, Google Sheets)
+- Export & reporting (CSV, Excel)
 - Enhanced analytics (payment methods, fee analysis, trends)
 
 **Phase 3 - Advanced Features**: 100% Complete (Beyond Original Scope)
@@ -314,7 +287,7 @@ uv run mypy .
 ### Common Issues
 1. **Transaction Filtering Not Working**: Ensure you have test data with various statuses
 2. **API Rate Limiting**: Built-in protection handles this automatically
-3. **Export Failures**: Check API keys and permissions for Google Sheets/Anthropic
+3. **Export Failures**: Verify data format and file permissions for Excel exports
 4. **Performance Issues**: Caching automatically optimizes repeated queries
 
 ### Configuration Updates

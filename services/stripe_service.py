@@ -115,7 +115,7 @@ def get_customer_subscriptions(customer_id):
     try:
         subscriptions = stripe.Subscription.list(
             customer=customer_id,
-            expand=['data.items.data.price.product']
+            expand=['data.items.data.price']
         )
         return subscriptions.data
     except Exception as e:
@@ -129,7 +129,7 @@ def get_all_subscriptions():
         subscriptions_data = []
         # Use auto-pagination to get ALL subscriptions with related data expanded
         for subscription in stripe.Subscription.list(
-            expand=['data.customer', 'data.items.data.price.product']
+            expand=['data.customer', 'data.items.data.price']
         ).auto_paging_iter():
             subscriptions_data.append(subscription)
         return subscriptions_data

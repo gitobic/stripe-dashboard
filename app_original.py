@@ -470,10 +470,19 @@ def render_customers_dashboard():
     
     with col3:
         st.write("**Quick Actions:**")
-        if st.button("🔄 Refresh Customer Data", key="cust_refresh"):
-            st.rerun()
-        if st.button("📊 Export Customer List", key="cust_export_btn"):
-            st.info("Use the Reports tab for detailed exports")
+        quick_col1, quick_col2, quick_col3 = st.columns(3)
+        
+        with quick_col1:
+            if st.button("🔄 Refresh Customer Data", key="cust_refresh"):
+                st.rerun()
+        
+        with quick_col2:
+            # Placeholder for CSV export button - will be functional after data load
+            csv_button_placeholder = st.empty()
+        
+        with quick_col3:
+            # Placeholder for Excel export button - will be functional after data load
+            excel_button_placeholder = st.empty()
     
     st.markdown("---")
     
@@ -536,6 +545,32 @@ def render_customers_dashboard():
         
         st.dataframe(customer_df, use_container_width=True)
         
+        # Populate Quick Actions export buttons with actual data
+        with csv_button_placeholder.container():
+            # CSV export
+            csv_data = customer_df.to_csv(index=False)
+            st.download_button(
+                label="📥 Export CSV",
+                data=csv_data,
+                file_name=f"stripe_customers_{datetime.now().strftime('%Y-%m-%d')}.csv",
+                mime="text/csv",
+                key="cust_csv_export"
+            )
+        
+        with excel_button_placeholder.container():
+            # Excel export
+            from io import BytesIO
+            excel_buffer = BytesIO()
+            customer_df.to_excel(excel_buffer, index=False, engine='openpyxl')
+            excel_data = excel_buffer.getvalue()
+            st.download_button(
+                label="📊 Export Excel", 
+                data=excel_data,
+                file_name=f"stripe_customers_{datetime.now().strftime('%Y-%m-%d')}.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                key="cust_excel_export"
+            )
+        
         # Customer detail view
         if selected_customer != 'None':
             customer_index = customer_df.index[customer_df.apply(lambda row: f"{row['Name']} ({row['Email']})" == selected_customer, axis=1)].tolist()
@@ -565,57 +600,20 @@ def render_customer_detail(customer):
         st.write("**Account Status:**")
         st.write(f"Delinquent: {'Yes' if getattr(customer, 'delinquent', False) else 'No'}")
         st.write(f"Balance: ${getattr(customer, 'balance', 0) / 100:.2f}")
-        st.write(f"Currency: {getattr(customer, 'currency', 'usd').upper()}")
+        st.write(f"Currency: {(getattr(customer, 'currency', 'usd') or 'usd').upper()}")
     
     with col3:
-        st.write("**Tags & Management:**")
-        # Display current tags
-        current_tags = get_customer_tags(customer.id)
-        if current_tags:
-            for tag in current_tags:
-                tag_color = load_tags_and_notes()["tag_definitions"].get(tag, {}).get("color", "gray")
-                st.markdown(f"<span style='background-color: {tag_color}; color: white; padding: 2px 6px; border-radius: 3px; margin: 2px;'>{tag}</span>", unsafe_allow_html=True)
+        st.write("**Additional Info:**")
+        # Show created date
+        if hasattr(customer, 'created'):
+            created_date = datetime.fromtimestamp(customer.created).strftime('%Y-%m-%d')
+            st.write(f"Customer since: {created_date}")
+        
+        # Show customer description if available
+        if hasattr(customer, 'description') and customer.description:
+            st.write(f"Description: {customer.description}")
         else:
-            st.write("No tags assigned")
-        
-        # Add new tag
-        available_tags = list(load_tags_and_notes()["tag_definitions"].keys())
-        new_tag = st.selectbox("Add Tag:", [""] + available_tags, key=f"tag_{customer.id}")
-        if new_tag and st.button("Add Tag", key=f"add_tag_{customer.id}"):
-            add_customer_tag(customer.id, new_tag)
-            st.success(f"Added tag: {new_tag}")
-            st.rerun()
-        
-        # Remove tag
-        if current_tags:
-            remove_tag = st.selectbox("Remove Tag:", [""] + current_tags, key=f"remove_tag_{customer.id}")
-            if remove_tag and st.button("Remove Tag", key=f"remove_tag_btn_{customer.id}"):
-                remove_customer_tag(customer.id, remove_tag)
-                st.success(f"Removed tag: {remove_tag}")
-                st.rerun()
-    
-    # Customer notes section
-    st.subheader("📝 Customer Notes")
-    current_notes = get_customer_notes(customer.id)
-    
-    # Display existing notes
-    if current_notes:
-        for note in current_notes:
-            st.text_area(
-                f"Note from {note['timestamp'][:10]}:",
-                value=note['note'],
-                disabled=True,
-                key=f"note_display_{customer.id}_{note['timestamp']}"
-            )
-    else:
-        st.info("No notes for this customer")
-    
-    # Add new note
-    new_note = st.text_area("Add a new note:", key=f"new_note_{customer.id}")
-    if st.button("Save Note", key=f"save_note_{customer.id}") and new_note.strip():
-        add_customer_note(customer.id, new_note.strip())
-        st.success("Note saved successfully!")
-        st.rerun()
+            st.write("No description available")
     
     # Payment history
     st.subheader("Payment History")
@@ -655,10 +653,10 @@ def render_customer_detail(customer):
     if subscriptions:
         subs_df = pd.DataFrame([{
             'Status': sub.status.title(),
-            'Start Date': datetime.fromtimestamp(sub.start_date).strftime('%Y-%m-%d'),
-            'Current Period End': datetime.fromtimestamp(sub.current_period_end).strftime('%Y-%m-%d'),
-            'Amount': f"${(sub.items.data[0].price.unit_amount if sub.items.data else 0) / 100:.2f}",
-            'Interval': f"{sub.items.data[0].price.recurring.interval if sub.items.data and sub.items.data[0].price.recurring else 'N/A'}",
+            'Start Date': datetime.fromtimestamp(sub.start_date).strftime('%Y-%m-%d') if hasattr(sub, 'start_date') and sub.start_date else 'N/A',
+            'Current Period End': datetime.fromtimestamp(sub.current_period_end).strftime('%Y-%m-%d') if hasattr(sub, 'current_period_end') and sub.current_period_end else 'N/A',
+            'Amount': f"${(sub.items.data[0].price.unit_amount if hasattr(sub, 'items') and sub.items.data and sub.items.data[0].price.unit_amount else 0) / 100:.2f}",
+            'Interval': f"{sub.items.data[0].price.recurring.interval if hasattr(sub, 'items') and sub.items.data and sub.items.data[0].price.recurring else 'N/A'}",
             'Subscription ID': sub.id
         } for sub in subscriptions])
         
@@ -700,10 +698,19 @@ def render_subscriptions_dashboard():
     
     with col3:
         st.write("**Quick Actions:**")
-        if st.button("🔄 Refresh Subscription Data", key="sub_refresh"):
-            st.rerun()
-        if st.button("📈 Calculate MRR/ARR", key="sub_calculate"):
-            st.info("MRR/ARR calculated automatically below")
+        quick_col1, quick_col2, quick_col3 = st.columns(3)
+        
+        with quick_col1:
+            if st.button("🔄 Refresh Subscription Data", key="sub_refresh"):
+                st.rerun()
+        
+        with quick_col2:
+            # Placeholder for CSV export button - will be functional after data load
+            csv_button_placeholder = st.empty()
+        
+        with quick_col3:
+            # Placeholder for Excel export button - will be functional after data load
+            excel_button_placeholder = st.empty()
     
     st.markdown("---")
     
@@ -802,35 +809,30 @@ def render_subscriptions_dashboard():
             display_df = subs_df.drop(columns=['Subscription ID'])
             st.dataframe(display_df, use_container_width=True)
             
-            # Export subscriptions
-            st.subheader("Export Subscription Data")
-            col1, col2 = st.columns(2)
-            
-            with col1:
+            # Populate Quick Actions export buttons with actual data
+            with csv_button_placeholder.container():
+                # CSV export
                 csv_data = subs_df.to_csv(index=False)
                 st.download_button(
-                    label="📥 Download Subscriptions CSV",
+                    label="📥 Export CSV",
                     data=csv_data,
                     file_name=f"stripe_subscriptions_{datetime.now().strftime('%Y-%m-%d')}.csv",
-                    mime="text/csv"
+                    mime="text/csv",
+                    key="sub_csv_export"
                 )
             
-            with col2:
-                # Metrics summary
-                summary_data = pd.DataFrame([{
-                    'Report Date': datetime.now().strftime('%Y-%m-%d'),
-                    'MRR': f"${mrr:,.2f}",
-                    'ARR': f"${arr:,.2f}",
-                    'Active Subscriptions': metrics['active_subscriptions'],
-                    'Churn Rate': f"{metrics['churn_rate']:.1f}%",
-                    'Trial Conversion Rate': f"{metrics['trial_conversion_rate']:.1f}%"
-                }])
-                summary_csv = summary_data.to_csv(index=False)
+            with excel_button_placeholder.container():
+                # Excel export
+                from io import BytesIO
+                excel_buffer = BytesIO()
+                subs_df.to_excel(excel_buffer, index=False, engine='openpyxl')
+                excel_data = excel_buffer.getvalue()
                 st.download_button(
-                    label="📊 Download Metrics Summary",
-                    data=summary_csv,
-                    file_name=f"subscription_metrics_{datetime.now().strftime('%Y-%m-%d')}.csv",
-                    mime="text/csv"
+                    label="📊 Export Excel", 
+                    data=excel_data,
+                    file_name=f"stripe_subscriptions_{datetime.now().strftime('%Y-%m-%d')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    key="sub_excel_export"
                 )
         else:
             st.info("No subscriptions found matching the selected filters")

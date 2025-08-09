@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **production-ready** Stripe dashboard application built with Python, using FastAPI and Streamlit for creating a comprehensive web-based dashboard to visualize Stripe data with Pandas and Plotly. The application provides complete financial analytics for Team Orlando Water Polo Club with advanced features including AI-powered insights, customer management, subscription analytics, and automated reporting.
+This is a Stripe dashboard application built with Python, using FastAPI and Streamlit for creating a web-based dashboard to visualize Stripe data with Pandas and Plotly. The application provides financial analytics for Team Orlando Water Polo Club with transaction tracking, customer management, and subscription analytics.
 
 ## Development Commands
 
@@ -32,42 +32,29 @@ python main.py
 ### Dashboard Access
 Once running, access the dashboard at: **http://localhost:8501**
 
-## Features Overview ✅ PRODUCTION READY
+## Features Overview 🔧 IN DEVELOPMENT
 
-### Complete 5-Tab Dashboard Interface:
+### 3-Tab Dashboard Interface:
 
 #### 📊 **Transactions Tab**
 - **Real-time Analytics**: Revenue charts, product breakdown, payment method analysis
 - **Advanced Filtering**: Payment status, amount ranges, date filtering with smart presets
-- **Data Export**: CSV, Excel with complete transaction history
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel
 - **Performance**: Auto-pagination handles unlimited transactions, intelligent 5-minute caching
 
 #### 👥 **Customers Tab** 
 - **Customer Management**: Complete customer profiles with contact info, payment history
-- **Tagging System**: Color-coded tags (VIP, Refund Risk, New Customer, Payment Issues)
-- **Notes System**: Timestamped interaction tracking and customer notes
 - **Advanced Search**: Filter by status, tags, search by name/email
-- **Lifetime Value**: Automated CLV calculations for customer prioritization
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel
+- **Customer Details**: Individual customer drill-down with payment history
 
 #### 🔄 **Subscriptions Tab**
 - **MRR/ARR Analytics**: Real-time recurring revenue calculations
 - **Churn Analysis**: Churn rates, trial conversion metrics, plan performance
 - **Subscription Management**: Filter by status, plan type, billing cycles
 - **Visual Analytics**: Status breakdown charts, revenue by plan analysis
-- **Export Capabilities**: Detailed subscription reports and metrics summaries
+- **Standardized Quick Actions**: Refresh data, export to CSV/Excel
 
-#### 📋 **Reports Tab**
-- **Multi-Format Export**: Google Sheets API integration, Excel, PDF reports
-- **AI-Powered Summaries**: Claude AI generates plain-English executive summaries
-- **Automated Reporting**: Comprehensive reports with key metrics and insights
-- **Date Range Flexibility**: Custom periods with intelligent defaults
-
-#### 🤖 **Analytics & AI Insights Tab**
-- **Stripe Fee Analysis**: Detailed fee breakdowns, optimization recommendations
-- **Revenue Forecasting**: 1-12 month revenue predictions with confidence intervals  
-- **Customer Lifetime Value**: Automated CLV analysis for top customers
-- **AI Business Recommendations**: Claude-powered strategic advice for fee optimization, pricing, growth
-- **Tag Analytics**: Customer segmentation analysis and performance tracking
 
 ## Architecture & Performance
 
@@ -87,9 +74,8 @@ Once running, access the dashboard at: **http://localhost:8501**
 ### Technology Stack:
 - **Backend**: Streamlit with FastAPI components
 - **Data Processing**: Pandas for analytics, Plotly for visualizations
-- **External APIs**: Stripe SDK, Claude AI (Anthropic), Google Sheets API
+- **External APIs**: Stripe SDK
 - **Caching**: Streamlit session-based intelligent caching
-- **Export**: Excel (openpyxl), PDF (reportlab), Google Sheets (gspread)
 
 ## Key Dependencies
 
@@ -110,15 +96,6 @@ STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
 
-### Optional Variables (for enhanced features):
-```
-# For Google Sheets export functionality
-GOOGLE_SERVICE_ACCOUNT_JSON={"type": "service_account", "project_id": "..."}
-
-# For Claude AI-powered recommendations and summaries
-ANTHROPIC_API_KEY=sk-ant-api...
-```
-
 The `.env` file is already configured for this project. The `.env.example` file shows the format for reference.
 
 ## MCP Servers Configuration
@@ -136,18 +113,16 @@ Both MCP servers are production-ready and enhance development capabilities beyon
 
 ## Current Project Status
 
-### ✅ PRODUCTION READY - Key Achievements:
-- **Complete Feature Set**: All original requirements exceeded
+### 🔧 IN DEVELOPMENT - Key Achievements:
+- **Core Feature Set**: Transaction tracking, customer management, subscription analytics
 - **Performance Optimized**: 60-70% reduction in API calls through intelligent caching and data expansion
 - **Production Scale**: Handles unlimited transactions via auto-pagination
-- **AI Integration**: Claude-powered business insights and recommendations
-- **Comprehensive Analytics**: MRR/ARR, CLV, forecasting, fee analysis
-- **Export Capabilities**: Multi-format exports (CSV, Excel, PDF, Google Sheets)
-- **Customer Management**: Complete CRM-like features with tagging and notes
+- **Clean Architecture**: Modular design with separation of concerns
 
-### Remaining Minor Enhancements:
-- Geographic customer distribution analysis
-- Scheduled email reports
-- Additional customer type filtering options
+### Current Focus Areas:
+- Enhanced transaction filtering and analysis
+- Improved customer management features  
+- Subscription analytics and tracking
+- Additional usability improvements
 
-**Ready for immediate deployment and use by Team Orlando Water Polo Club board and finance team.**
+**Status**: Core functionality complete, additional features and polish in development.
