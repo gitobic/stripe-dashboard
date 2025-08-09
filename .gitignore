@@ -1,6 +1,9 @@
 # Environment variables (CRITICAL - protects API keys)
 .env
 
+# Streamlit secrets (CRITICAL - protects credentials and API keys)
+.streamlit/secrets.toml
+
 # Python
 __pycache__/
 *.pyc

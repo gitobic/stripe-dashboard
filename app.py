@@ -22,6 +22,45 @@ from app_original import (
 # Initialize Stripe
 stripe.api_key = STRIPE_SECRET_KEY
 
+def check_authentication():
+    """Handle authentication logic"""
+    # Initialize session state
+    if 'authenticated' not in st.session_state:
+        st.session_state.authenticated = False
+    
+    # If not authenticated, show login form
+    if not st.session_state.authenticated:
+        st.title("🏊‍♂️ Team Orlando Water Polo Club")
+        st.subheader("Dashboard Access")
+        
+        with st.form("login_form"):
+            st.write("Please enter your credentials to access the dashboard:")
+            username = st.text_input("Username")
+            password = st.text_input("Password", type="password")
+            submit = st.form_submit_button("Login")
+            
+            if submit:
+                # Get credentials from secrets or environment with proper fallback
+                try:
+                    valid_username = st.secrets.get("DASHBOARD_USERNAME")
+                    valid_password = st.secrets.get("DASHBOARD_PASSWORD")
+                    if not valid_username or not valid_password:
+                        st.error("❌ Authentication credentials not configured. Please set DASHBOARD_USERNAME and DASHBOARD_PASSWORD in Streamlit secrets.")
+                        st.stop()
+                except (AttributeError, FileNotFoundError):
+                    st.error("❌ Authentication system requires secrets configuration. Please configure DASHBOARD_USERNAME and DASHBOARD_PASSWORD.")
+                    st.info("💡 For local development, create `.streamlit/secrets.toml` with your credentials.")
+                    st.stop()
+                
+                if username == valid_username and password == valid_password:
+                    st.session_state.authenticated = True
+                    st.success("Login successful!")
+                    st.rerun()
+                else:
+                    st.error("Invalid username or password")
+        
+        st.stop()
+
 def main():
     """Main application function"""
     st.set_page_config(
@@ -30,9 +69,19 @@ def main():
         layout="wide"
     )
     
+    # Check authentication first
+    check_authentication()
+    
     # App header
-    st.title("🏊‍♂️ Team Orlando Water Polo Club")
-    st.subheader("Stripe Financial Dashboard")
+    col1, col2 = st.columns([4, 1])
+    with col1:
+        st.title("🏊‍♂️ Team Orlando Water Polo Club")
+        st.subheader("Stripe Financial Dashboard")
+    with col2:
+        st.write("")  # Add some spacing
+        if st.button("🚪 Logout", type="secondary"):
+            st.session_state.authenticated = False
+            st.rerun()
     
     # Navigation tabs
     tab1, tab2, tab3 = st.tabs([

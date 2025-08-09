@@ -45,6 +45,37 @@ uv run streamlit run app.py
 4. **Access Dashboard**
 Navigate to: **http://localhost:8501**
 
+## 🔒 Security & Deployment
+
+### 🔐 Authentication & Security Features
+- **Username/password authentication** protects dashboard access
+- **Session-based access control** with secure logout
+- **Environment-based secrets management** (no hardcoded credentials)
+- **API key protection** via `.env` files and Streamlit secrets
+- **Production-ready** security configuration
+
+### 🌐 Streamlit Cloud Deployment
+
+**Ready for one-click cloud deployment!**
+
+1. **Push to GitHub** (all secrets are properly git-ignored)
+2. **Connect to Streamlit Cloud** at [share.streamlit.io](https://share.streamlit.io)
+3. **Configure Secrets** in Streamlit Cloud dashboard:
+   ```
+   DASHBOARD_USERNAME = "your_admin_username"
+   DASHBOARD_PASSWORD = "your_secure_password"
+   STRIPE_SECRET_KEY = "your_stripe_secret_key"
+   STRIPE_PUBLISHABLE_KEY = "your_stripe_publishable_key"
+   ```
+4. **Deploy** - Your dashboard will be live with HTTPS and authentication
+
+### 🛡️ Security Best Practices
+- ✅ All sensitive data properly protected with `.gitignore`
+- ✅ No hardcoded secrets in codebase
+- ✅ Dual environment support (local `.env` + cloud secrets)
+- ✅ Production-ready authentication system
+- ✅ HTTPS-only deployment on Streamlit Cloud
+
 ## 🏗️ Architecture Overview
 
 ### Modular Design (Recently Refactored)

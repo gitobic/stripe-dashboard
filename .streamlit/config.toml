@@ -1,0 +1,23 @@
+[server]
+# Optimize for cloud deployment
+maxUploadSize = 200
+maxMessageSize = 200
+enableXsrfProtection = true
+
+[browser]
+# Auto-gather usage stats for Streamlit Cloud
+gatherUsageStats = true
+
+[theme]
+# Clean professional theme
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
+
+[runner]
+# Optimize performance
+magicEnabled = true
+
+[logger]
+level = "info"
