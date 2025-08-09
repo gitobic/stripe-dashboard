@@ -11,12 +11,6 @@ dependencies = [
     "streamlit>=1.47.1",
     "stripe>=12.3.0",
     "uvicorn>=0.35.0",
-    "gspread>=6.1.4",
-    "google-auth>=2.35.0",
-    "google-auth-oauthlib>=1.2.1",
-    "anthropic>=0.40.0",
-    "openpyxl>=3.1.5",
-    "reportlab>=4.2.5",
 ]
 
 [project.optional-dependencies]
@@ -39,7 +33,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["config", "services", "models", "analytics", "exports", "dashboard", "utils"]
+packages = ["config", "services", "analytics", "dashboard", "utils"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

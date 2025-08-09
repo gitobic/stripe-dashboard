@@ -201,34 +201,153 @@ def render_transactions_dashboard():
         else:
             return 'Guest'
     
-    def get_product_info(charge):
-        # Try to get from metadata first
+    def get_basic_product_category(charge):
+        """Get the basic product category (Payment, Subscription Update, etc.)"""
+        # Check if this is a subscription-related charge
+        if hasattr(charge, 'invoice') and charge.invoice:
+            return 'Subscription Update'
+        
+        # Check if this is from a payment link
         if hasattr(charge, 'metadata') and charge.metadata:
-            if 'product_name' in charge.metadata:
-                return charge.metadata['product_name']
-            elif 'product' in charge.metadata:
-                return charge.metadata['product']
-            elif 'item_name' in charge.metadata:
-                return charge.metadata['item_name']
+            if 'payment_link' in charge.metadata or 'payment_link_id' in charge.metadata or 'payment_link_url' in charge.metadata:
+                return 'Payment Link'
         
-        # Try to get from description
+        # Check description for payment link patterns
         if hasattr(charge, 'description') and charge.description:
-            desc = charge.description
-            if not desc.lower().startswith('payment for'):
-                return desc
+            desc = charge.description.lower()
+            if 'payment link' in desc:
+                return 'Payment Link'
+            elif 'subscription' in desc:
+                return 'Subscription Update'
         
-        # Try to get from receipt_email or statement_descriptor
-        if hasattr(charge, 'statement_descriptor') and charge.statement_descriptor:
-            return charge.statement_descriptor
-        
-        # Default fallback
+        # Default to Payment for everything else
         return 'Payment'
+    
+    def get_detailed_product_info(charge):
+        """Get specific detailed product names by matching amounts to known products"""
+        import stripe
+        
+        # Cache for product/price lookup
+        if not hasattr(get_detailed_product_info, '_price_cache'):
+            get_detailed_product_info._price_cache = None
+        
+        try:
+            # Build price cache if not exists
+            if get_detailed_product_info._price_cache is None:
+                price_cache = {}
+                try:
+                    # Get all prices with expanded product info
+                    prices = stripe.Price.list(limit=100, expand=['data.product'])
+                    for price in prices.data:
+                        if price.unit_amount and hasattr(price, 'product') and hasattr(price.product, 'name'):
+                            amount_dollars = price.unit_amount / 100
+                            price_cache[amount_dollars] = price.product.name
+                    get_detailed_product_info._price_cache = price_cache
+                except Exception:
+                    get_detailed_product_info._price_cache = {}
+            
+            charge_amount = charge.amount / 100
+            
+            # Check if this is related to a subscription - get the actual subscription/product name
+            if hasattr(charge, 'invoice') and charge.invoice:
+                try:
+                    invoice = stripe.Invoice.retrieve(charge.invoice, expand=['subscription.items.data.price.product'])
+                    if invoice.subscription:
+                        subscription = invoice.subscription
+                        if hasattr(subscription, 'items') and subscription.items.data:
+                            # Get the first subscription item's product name
+                            item = subscription.items.data[0]
+                            if hasattr(item, 'price') and hasattr(item.price, 'product'):
+                                product = item.price.product
+                                if hasattr(product, 'name'):
+                                    return product.name
+                                elif isinstance(product, str):
+                                    try:
+                                        product_obj = stripe.Product.retrieve(product)
+                                        if hasattr(product_obj, 'name'):
+                                            return product_obj.name
+                                    except:
+                                        pass
+                except Exception:
+                    pass
+            
+            # For subscription updates without invoice, try to match by amount
+            if (hasattr(charge, 'description') and charge.description and 
+                'subscription' in charge.description.lower()):
+                
+                # Try to match amount to known product
+                if charge_amount in get_detailed_product_info._price_cache:
+                    return get_detailed_product_info._price_cache[charge_amount]
+                
+                # Common subscription amounts for Team Orlando
+                if charge_amount == 193.00:
+                    return "High School Season Membership"
+                elif charge_amount == 250.00:
+                    return "Premium Membership Plan"
+                elif charge_amount == 125.00:
+                    return "Junior Olympics Hotel"
+                elif charge_amount == 575.00:
+                    return "Junior Olympics Registration"
+                else:
+                    return f"Membership (${charge_amount})"
+            
+            # Check if this is from a payment link
+            if hasattr(charge, 'metadata') and charge.metadata:
+                if 'payment_link' in charge.metadata or 'payment_link_id' in charge.metadata:
+                    payment_link_id = charge.metadata.get('payment_link') or charge.metadata.get('payment_link_id')
+                    if payment_link_id:
+                        try:
+                            payment_link = stripe.PaymentLink.retrieve(payment_link_id)
+                            line_items = stripe.PaymentLink.list_line_items(payment_link_id)
+                            if line_items.data:
+                                item = line_items.data[0]
+                                if hasattr(item, 'price') and hasattr(item.price, 'product'):
+                                    product = item.price.product
+                                    if hasattr(product, 'name'):
+                                        return product.name
+                                    elif isinstance(product, str):
+                                        try:
+                                            product_obj = stripe.Product.retrieve(product)
+                                            if hasattr(product_obj, 'name'):
+                                                return product_obj.name
+                                        except:
+                                            pass
+                            return "Online Payment"
+                        except Exception:
+                            return "Online Payment"
+                
+                if 'payment_link_url' in charge.metadata:
+                    return "Online Payment"
+            
+            # Try to match amount to known products for regular payments
+            if charge_amount in get_detailed_product_info._price_cache:
+                return get_detailed_product_info._price_cache[charge_amount]
+            
+            # Try to get from metadata/description
+            if hasattr(charge, 'metadata') and charge.metadata:
+                if 'product_name' in charge.metadata:
+                    return charge.metadata['product_name']
+                elif 'item_name' in charge.metadata:
+                    return charge.metadata['item_name']
+            
+            if hasattr(charge, 'description') and charge.description:
+                desc = charge.description
+                if not desc.lower().startswith('payment for'):
+                    return desc
+            
+            # For unmatched amounts, show the amount for context
+            return f"Payment (${charge_amount})"
+            
+        except Exception as e:
+            # If any error occurs in detailed lookup, show basic info
+            charge_amount = charge.amount / 100
+            return f"Payment (${charge_amount})"
     
     df = pd.DataFrame([{
         'Date': datetime.fromtimestamp(charge.created).strftime('%Y-%m-%d %H:%M'),
         'Amount': f"${charge.amount / 100:.2f}",
-        'Product': get_product_info(charge),
-        'Currency': charge.currency.upper(),
+        'Product': get_basic_product_category(charge),
+        'Product Details': get_detailed_product_info(charge),
         'Status': charge.status.title(),
         'Customer': get_customer_name(charge)
     } for charge in filtered_data])

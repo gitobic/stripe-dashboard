@@ -69,24 +69,6 @@ class TestTransactionDashboardIntegration:
 class TestAnalyticsIntegration:
     """Integration tests for analytics components"""
     
-    def test_fee_calculation_integration(self):
-        """Test fee calculation with realistic data"""
-        from analytics.fees import calculate_stripe_fees
-        
-        charges = create_mock_charges(5)
-        # Set all charges to succeeded for fee calculation
-        for charge in charges:
-            charge.status = 'succeeded'
-        
-        result = calculate_stripe_fees(charges)
-        
-        assert 'total_fees' in result
-        assert 'total_revenue' in result
-        assert 'fee_percentage' in result
-        assert result['total_fees'] > 0
-        assert result['total_revenue'] > 0
-        assert 0 < result['fee_percentage'] < 10  # Reasonable fee percentage
-    
     def test_charts_generation(self):
         """Test chart generation with mock data"""
         from analytics.charts import create_revenue_chart, create_product_chart
@@ -105,10 +87,10 @@ class TestDataFlowIntegration:
     """Test data flow between different components"""
     
     @patch('services.stripe_service.stripe')
-    def test_stripe_to_analytics_flow(self, mock_stripe):
-        """Test data flow from Stripe service to analytics"""
+    def test_stripe_to_charts_flow(self, mock_stripe):
+        """Test data flow from Stripe service to charts"""
         from services.stripe_service import filter_charges_data
-        from analytics.fees import calculate_stripe_fees
+        from analytics.charts import create_revenue_chart
         
         # Create mock data
         charges = create_mock_charges(10)
@@ -117,25 +99,21 @@ class TestDataFlowIntegration:
         filtered = filter_charges_data(charges, ['succeeded'], 0, 1000)
         assert len(filtered) <= len(charges)
         
-        # Test analytics on filtered data
-        fees = calculate_stripe_fees(filtered)
-        assert isinstance(fees, dict)
+        # Test chart creation on filtered data
+        chart = create_revenue_chart(filtered)
+        assert chart is not None
     
-    def test_customer_data_to_tags_flow(self):
-        """Test customer data to tagging system flow"""
-        from models.customer_data import add_customer_tag, get_customer_tags
+    def test_customer_data_flow(self):
+        """Test customer data flow"""
+        from services.stripe_service import get_customers_data
         
-        with patch('models.customer_data.load_tags_and_notes') as mock_load, \
-             patch('models.customer_data.save_tags_and_notes') as mock_save:
+        with patch('services.stripe_service.stripe') as mock_stripe:
+            # Mock stripe response
+            mock_stripe.Customer.list.return_value.auto_paging_iter.return_value = create_mock_customers(5)
             
-            mock_load.return_value = {"customer_tags": {}}
-            mock_save.return_value = True
-            
-            # Test adding tag
-            add_customer_tag("cus_test", "VIP")
-            
-            # Verify save was called
-            mock_save.assert_called_once()
+            # Test getting customer data
+            customers = get_customers_data()
+            assert isinstance(customers, list)
 
 class TestErrorHandlingIntegration:
     """Test error handling across components"""
@@ -154,32 +132,30 @@ class TestErrorHandlingIntegration:
     
     def test_invalid_data_handling(self):
         """Test handling of invalid data formats"""
-        from analytics.calculations import calculate_customer_lifetime_value
+        from analytics.charts import create_revenue_chart
         
-        # Test with invalid customer ID format
-        result = calculate_customer_lifetime_value(None, [])
-        assert result == 0.0
+        # Test with empty data
+        result = create_revenue_chart([])
+        assert result is not None
         
-        # Test with malformed charges
+        # Test with malformed charges - should handle gracefully
         invalid_charges = [Mock()]  # Missing required attributes
-        result = calculate_customer_lifetime_value("cus_test", invalid_charges)
-        assert result == 0.0
+        result = create_revenue_chart(invalid_charges)
+        assert result is not None
 
 class TestPerformanceIntegration:
     """Test performance characteristics of integrated components"""
     
     def test_large_dataset_handling(self):
         """Test handling of large datasets"""
-        from analytics.calculations import calculate_churn_metrics
-        from tests.fixtures.stripe_fixtures import create_mock_subscriptions
+        from analytics.charts import create_revenue_chart
         
         # Create large dataset
-        large_subscription_set = create_mock_subscriptions(1000)
+        large_charges_set = create_mock_charges(1000)
         
         # Should handle large datasets without errors
-        result = calculate_churn_metrics(large_subscription_set)
-        assert isinstance(result, dict)
-        assert result['total_subscriptions'] == 1000
+        result = create_revenue_chart(large_charges_set)
+        assert result is not None
     
     def test_caching_integration(self):
         """Test caching mechanisms work correctly"""
